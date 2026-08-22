@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: pifpaf-bloggers
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_PATH
+        value: ./data/app.db
+      - key: APIFY_TOKEN
+        sync: false
+      - key: APIFY_ACTOR_ID
+        value: apify/instagram-reel-scraper

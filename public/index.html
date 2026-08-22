@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PifPaf Reels — кабинет блогера</title>
+  <meta name="description" content="Личный кабинет для инстаграм-блогеров: просмотры, обложки и аналитика рилсов" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="bg-blobs" aria-hidden="true">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+    <span class="blob blob-c"></span>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <section id="auth-screen" class="screen auth-screen">
+    <div class="auth-card">
+      <div class="brand-mark">
+        <span class="brand-name">PifPaf</span>
+        <span class="brand-ai">Reels</span>
+      </div>
+      <h1 class="auth-title">Кабинет для блогеров</h1>
+      <p class="auth-sub">Закинь ссылку на Reel — подтянем просмотры, дату и обложку сами.</p>
+
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab is-active" data-tab="login">Вход</button>
+        <button type="button" class="tab" data-tab="register">Регистрация</button>
+      </div>
+
+      <form id="login-form" class="auth-form" autocomplete="on">
+        <label>
+          <span>Логин</span>
+          <input name="username" type="text" required minlength="3" maxlength="24" placeholder="masha_reels" />
+        </label>
+        <label>
+          <span>Пароль</span>
+          <input name="password" type="password" required minlength="6" placeholder="••••••••" />
+        </label>
+        <p class="form-error" id="login-error" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block" id="login-btn">Войти</button>
+      </form>
+
+      <form id="register-form" class="auth-form is-hidden" autocomplete="on">
+        <label>
+          <span>Логин</span>
+          <input name="username" type="text" required minlength="3" maxlength="24" placeholder="masha_reels" />
+        </label>
+        <label>
+          <span>Instagram</span>
+          <input name="instagram_handle" type="text" maxlength="40" placeholder="@username" />
+        </label>
+        <label>
+          <span>Пароль</span>
+          <input name="password" type="password" required minlength="6" placeholder="минимум 6 символов" />
+        </label>
+        <p class="form-error" id="register-error" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block" id="register-btn">Создать кабинет</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="dash-screen" class="screen dash-screen is-hidden">
+    <header class="topbar">
+      <div class="brand-mark brand-mark-sm">
+        <span class="brand-name">PifPaf</span>
+        <span class="brand-ai">Reels</span>
+      </div>
+      <button type="button" class="btn btn-ghost" id="logout-btn">Выйти</button>
+    </header>
+
+    <main class="dash-main">
+      <div class="hero-row">
+        <div>
+          <p class="eyebrow">личный кабинет</p>
+          <h1 id="greeting">Привет!</h1>
+          <p class="hero-sub" id="handle-line">Собирай рилсы в одну ленту и следи за просмотрами.</p>
+        </div>
+        <div class="stat-card" id="stat-card">
+          <span class="stat-label">Total Views</span>
+          <strong class="stat-value" id="total-views">—</strong>
+          <span class="stat-meta" id="stat-meta">загружаем…</span>
+        </div>
+      </div>
+
+      <form id="add-form" class="add-bar">
+        <div class="add-input-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10.5 5.43" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M14 11a5 5 0 0 0-7.07 0L4.8 13.12a5 5 0 1 0 7.07 7.07L13.5 18.57" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <input
+            id="reel-url"
+            name="instagram_url"
+            type="url"
+            required
+            placeholder="https://www.instagram.com/reel/…"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary" id="add-btn">Добавить</button>
+      </form>
+      <p class="form-error add-error" id="add-error" hidden></p>
+
+      <div class="feed-head">
+        <h2>Твоя лента</h2>
+        <div class="view-toggle" role="group" aria-label="Вид ленты">
+          <button type="button" class="chip is-active" data-view="grid">Сетка</button>
+          <button type="button" class="chip" data-view="list">Список</button>
+        </div>
+      </div>
+
+      <div id="feed" class="feed feed-grid" aria-live="polite"></div>
+    </main>
+  </section>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
