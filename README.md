@@ -1,28 +1,28 @@
 # PifPaf Reels — кабинет блогера
 
-Vanilla JS + Express + SQLite. Просмотры/обложки/даты рилсов через Apify.
-
 ## Локально
 
 ```bash
 cp .env.example .env
-# впиши APIFY_TOKEN с https://console.apify.com/account/integrations
+# APIFY_TOKEN → https://console.apify.com/account/integrations
 npm install
-npm run dev
+npm start
 ```
 
-Открой http://localhost:3000
+http://localhost:3000
 
-## Деплой (Render)
+## Деплой на Render (стабильный URL)
 
-1. New → Web Service → подключи репозиторий
-2. Build: `npm install`
-3. Start: `npm start`
-4. Env: `APIFY_TOKEN`, `SESSION_SECRET`, `NODE_ENV=production`
+1. Открой: **https://render.com/deploy?repo=https://github.com/elenaarbuzova/pifpaf-bloggers**
+2. Подключи GitHub, нажми **Apply**
+3. В Environment добавь `APIFY_TOKEN` (твой ключ Apify)
+4. Дождись деплоя — получишь URL вида `https://pifpaf-bloggers.onrender.com`
 
-Или кнопка ниже / CLI:
+`render.yaml` уже в репозитории — Render подхватит настройки сам.
 
-```bash
-# пример через Railway
-railway up
-```
+## Что умеет
+
+- Личные кабинеты блогеров
+- Reel по ссылке → просмотры, дата, обложка через Apify
+- Total Views, средние, топ-рил, график по дням
+- Лента сетка / список

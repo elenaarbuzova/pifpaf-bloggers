@@ -2,7 +2,9 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { getDb } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
-import { isValidInstagramUrl, scrapeReel } from '../services/apify.js';
+import { isValidInstagramUrl, scrapeReel, normalizeInstagramUrl } from '../services/apify.js';
+import { cacheCover, removeCover } from '../services/covers.js';
+import { humanizeApifyError } from '../services/errors.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -25,13 +27,20 @@ async function processVideo(videoId, url) {
   const db = getDb();
   try {
     const data = await scrapeReel(url);
+    const cachedCover = await cacheCover(videoId, data.cover_url);
     db.prepare(
       `UPDATE videos
-       SET cover_url = ?, views_count = ?, publish_date = ?,
+       SET instagram_url = ?, cover_url = ?, views_count = ?, publish_date = ?,
            status = 'ready', error_message = NULL,
            updated_at = datetime('now')
        WHERE id = ?`
-    ).run(data.cover_url, data.views_count, data.publish_date, videoId);
+    ).run(
+      data.instagram_url || url,
+      cachedCover,
+      data.views_count,
+      data.publish_date,
+      videoId
+    );
   } catch (err) {
     console.error('Apify error:', err.message);
     db.prepare(
@@ -39,7 +48,7 @@ async function processVideo(videoId, url) {
        SET status = 'failed', error_message = ?,
            updated_at = datetime('now')
        WHERE id = ?`
-    ).run(String(err.message).slice(0, 300), videoId);
+    ).run(humanizeApifyError(err.message), videoId);
   }
 }
 
@@ -61,19 +70,63 @@ router.get('/', (req, res) => {
 
 router.get('/stats', (req, res) => {
   try {
-    const row = getDb()
+    const db = getDb();
+    const userId = req.session.userId;
+
+    const row = db
       .prepare(
         `SELECT
            COALESCE(SUM(CASE WHEN status = 'ready' THEN views_count ELSE 0 END), 0) AS total_views,
            COUNT(*) AS total_videos,
-           SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END) AS ready_count
+           SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END) AS ready_count,
+           COALESCE(AVG(CASE WHEN status = 'ready' THEN views_count END), 0) AS avg_views
          FROM videos WHERE user_id = ?`
       )
-      .get(req.session.userId);
+      .get(userId);
+
+    const topReel = db
+      .prepare(
+        `SELECT id, instagram_url, cover_url, views_count, publish_date
+         FROM videos
+         WHERE user_id = ? AND status = 'ready'
+         ORDER BY views_count DESC, datetime(created_at) DESC
+         LIMIT 1`
+      )
+      .get(userId);
+
+    const dayRows = db
+      .prepare(
+        `SELECT
+           date(COALESCE(publish_date, created_at)) AS day,
+           COALESCE(SUM(views_count), 0) AS views,
+           COUNT(*) AS reels
+         FROM videos
+         WHERE user_id = ? AND status = 'ready'
+         GROUP BY day
+         ORDER BY day DESC
+         LIMIT 14`
+      )
+      .all(userId);
+
     res.json({
       total_views: row.total_views || 0,
       total_videos: row.total_videos || 0,
       ready_count: row.ready_count || 0,
+      avg_views: Math.round(row.avg_views || 0),
+      top_reel: topReel
+        ? {
+            id: topReel.id,
+            instagram_url: topReel.instagram_url,
+            cover_url: topReel.cover_url,
+            views_count: topReel.views_count,
+            publish_date: topReel.publish_date,
+          }
+        : null,
+      views_by_day: dayRows.reverse().map((d) => ({
+        date: d.day,
+        views: d.views,
+        reels: d.reels,
+      })),
     });
   } catch (err) {
     console.error(err);
@@ -83,7 +136,9 @@ router.get('/stats', (req, res) => {
 
 router.post('/', (req, res) => {
   try {
-    const instagram_url = String(req.body.instagram_url || '').trim();
+    const instagram_url = normalizeInstagramUrl(
+      String(req.body.instagram_url || '').trim()
+    );
     if (!isValidInstagramUrl(instagram_url)) {
       return res.status(400).json({
         error: 'Нужна ссылка на Instagram Reel или пост',
@@ -150,6 +205,7 @@ router.delete('/:id', (req, res) => {
     if (!result.changes) {
       return res.status(404).json({ error: 'Видео не найдено' });
     }
+    removeCover(req.params.id);
     res.json({ ok: true });
   } catch (err) {
     console.error(err);

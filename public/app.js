@@ -234,7 +234,7 @@ function statusLabel(status) {
 
 function cardHtml(video) {
   const cover = video.cover_url
-    ? `<img src="${escapeAttr(video.cover_url)}" alt="Обложка рила" loading="lazy" />`
+    ? `<img src="${escapeAttr(video.cover_url)}" alt="Обложка рила" loading="lazy" referrerpolicy="no-referrer" />`
     : '';
   return `
     <article class="card" data-id="${video.id}">
@@ -336,9 +336,66 @@ async function loadStats() {
       stats.total_videos === 0
         ? 'пока без рилсов'
         : `${stats.ready_count} из ${stats.total_videos} готовы`;
+
+    const analytics = document.getElementById('analytics');
+    if (stats.ready_count > 0) {
+      analytics.hidden = false;
+      document.getElementById('avg-views').textContent = formatViews(stats.avg_views);
+      document.getElementById('reels-count').textContent = String(stats.ready_count);
+      document.getElementById('top-views').textContent = stats.top_reel
+        ? formatViews(stats.top_reel.views_count)
+        : '—';
+      renderChart(stats.views_by_day || []);
+      renderTopReel(stats.top_reel);
+    } else {
+      analytics.hidden = true;
+    }
   } catch {
     document.getElementById('total-views').textContent = '—';
   }
+}
+
+function renderChart(days) {
+  const chart = document.getElementById('views-chart');
+  if (!days.length) {
+    chart.innerHTML = '<p class="chart-empty">Пока мало данных для графика</p>';
+    return;
+  }
+  const max = Math.max(...days.map((d) => d.views), 1);
+  chart.innerHTML = days
+    .map((d) => {
+      const h = Math.max(8, Math.round((d.views / max) * 100));
+      const label = new Date(d.date).toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'short',
+      });
+      return `
+        <div class="bar-col" title="${formatViews(d.views)} просмотров">
+          <div class="bar-fill" style="height:${h}%"></div>
+          <span class="bar-label">${label}</span>
+        </div>`;
+    })
+    .join('');
+}
+
+function renderTopReel(reel) {
+  const panel = document.getElementById('top-reel-panel');
+  const el = document.getElementById('top-reel');
+  if (!reel) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  const cover = reel.cover_url
+    ? `<img src="${escapeAttr(reel.cover_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
+    : '<div class="top-cover-fallback"></div>';
+  el.innerHTML = `
+    <div class="top-reel-cover">${cover}</div>
+    <div class="top-reel-info">
+      <div class="views">${formatViews(reel.views_count)} просмотров</div>
+      <div class="meta">${formatDate(reel.publish_date)}</div>
+      <a class="btn-tiny" href="${escapeAttr(reel.instagram_url)}" target="_blank" rel="noopener">Открыть в Instagram</a>
+    </div>`;
 }
 
 async function loadVideos({ skeleton = false } = {}) {

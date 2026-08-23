@@ -26,7 +26,7 @@
         <span class="brand-ai">Reels</span>
       </div>
       <h1 class="auth-title">Кабинет для блогеров</h1>
-      <p class="auth-sub">Закинь ссылку на Reel — подтянем просмотры, дату и обложку сами.</p>
+      <p class="auth-sub">Ссылка на Reel — просмотры, дата и обложка подтянутся сами.</p>
 
       <div class="tabs" role="tablist">
         <button type="button" class="tab is-active" data-tab="login">Вход</button>
@@ -87,6 +87,37 @@
           <span class="stat-meta" id="stat-meta">загружаем…</span>
         </div>
       </div>
+
+      <section class="analytics" id="analytics" hidden>
+        <div class="analytics-head">
+          <h2>Аналитика</h2>
+          <span class="badge-soft">обновляется автоматически</span>
+        </div>
+        <div class="analytics-grid">
+          <div class="mini-stat">
+            <span class="mini-label">Средние просмотры</span>
+            <strong id="avg-views">—</strong>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-label">Рилов в ленте</span>
+            <strong id="reels-count">—</strong>
+          </div>
+          <div class="mini-stat mini-stat-accent">
+            <span class="mini-label">Лучший рил</span>
+            <strong id="top-views">—</strong>
+          </div>
+        </div>
+        <div class="analytics-panels">
+          <div class="panel chart-panel">
+            <div class="panel-title">Динамика по дням</div>
+            <div id="views-chart" class="bar-chart" aria-label="График просмотров"></div>
+          </div>
+          <div class="panel top-panel" id="top-reel-panel" hidden>
+            <div class="panel-title">Топ Reel</div>
+            <div class="top-reel" id="top-reel"></div>
+          </div>
+        </div>
+      </section>
 
       <form id="add-form" class="add-bar">
         <div class="add-input-wrap">

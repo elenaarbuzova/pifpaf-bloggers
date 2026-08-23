@@ -4,5 +4,8 @@ data/*.db
 data/*.db-*
 data/*.db-shm
 data/*.db-wal
+public/covers/*.jpg
+public/covers/*.webp
+public/covers/*.png
 .DS_Store
 *.log
