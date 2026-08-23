@@ -19,6 +19,18 @@
 
   <div id="toast" class="toast" hidden></div>
 
+  <div id="confirm-modal" class="modal" hidden aria-hidden="true">
+    <div class="modal-backdrop" data-confirm-dismiss></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 class="modal-title" id="confirm-title">Удалить Reel?</h3>
+      <p class="modal-text" id="confirm-message"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost btn-sm" id="confirm-cancel">Отмена</button>
+        <button type="button" class="btn btn-primary btn-sm" id="confirm-ok">Удалить</button>
+      </div>
+    </div>
+  </div>
+
   <section id="auth-screen" class="screen auth-screen">
     <div class="auth-card">
       <div class="brand-mark">
@@ -67,85 +79,101 @@
 
   <section id="dash-screen" class="screen dash-screen is-hidden">
     <header class="topbar">
-      <div class="brand-mark brand-mark-sm">
-        <span class="brand-name">PifPaf</span>
-        <span class="brand-ai">Reels</span>
+      <div class="topbar-inner">
+        <div class="topbar-left">
+          <div class="brand-mark brand-mark-sm">
+            <span class="brand-name">PifPaf</span>
+            <span class="brand-ai">Reels</span>
+          </div>
+        </div>
+        <div class="dash-tabs" role="tablist" aria-label="Разделы кабинета">
+          <button type="button" class="dash-tab is-active" data-dash="reels" role="tab" aria-selected="true" aria-controls="dash-panel-reels">Reels</button>
+          <button type="button" class="dash-tab" data-dash="analytics" role="tab" aria-selected="false" aria-controls="dash-panel-analytics">Аналитика</button>
+        </div>
+        <div class="topbar-right">
+          <button type="button" class="btn btn-ghost btn-sm btn-icon" id="logout-btn" aria-label="Выйти" title="Выйти">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
-      <button type="button" class="btn btn-ghost" id="logout-btn">Выйти</button>
     </header>
 
     <main class="dash-main">
-      <div class="hero-row">
-        <div>
+      <div id="dash-panel-reels" class="dash-panel" role="tabpanel">
+        <div class="hero">
           <p class="eyebrow">личный кабинет</p>
           <h1 id="greeting">Привет!</h1>
-          <p class="hero-sub" id="handle-line">Собирай рилсы в одну ленту и следи за просмотрами.</p>
+          <p class="hero-stats" id="hero-stats">загружаем…</p>
         </div>
-        <div class="stat-card" id="stat-card">
-          <span class="stat-label">Total Views</span>
-          <strong class="stat-value" id="total-views">—</strong>
-          <span class="stat-meta" id="stat-meta">загружаем…</span>
+
+        <form id="add-form" class="add-bar">
+          <div class="add-input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10.5 5.43" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M14 11a5 5 0 0 0-7.07 0L4.8 13.12a5 5 0 1 0 7.07 7.07L13.5 18.57" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <input
+              id="reel-url"
+              name="instagram_url"
+              type="url"
+              required
+              placeholder="Вставьте ссылку на Instagram Reel"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary" id="add-btn">Добавить</button>
+        </form>
+        <p class="add-status" id="add-status" hidden></p>
+        <p class="form-error add-error" id="add-error" hidden></p>
+
+        <div class="feed-head">
+          <div class="view-toggle" role="group" aria-label="Вид ленты">
+            <button type="button" class="chip is-active" data-view="grid" aria-label="Сетка" title="Сетка">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <rect x="1.5" y="1.5" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="9.5" y="1.5" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="1.5" y="9.5" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="9.5" y="9.5" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </button>
+            <button type="button" class="chip" data-view="list" aria-label="Список" title="Список">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
         </div>
+
+        <div id="feed" class="feed feed-grid" aria-live="polite"></div>
       </div>
 
-      <section class="analytics" id="analytics" hidden>
-        <div class="analytics-head">
-          <h2>Аналитика</h2>
-          <span class="badge-soft">обновляется автоматически</span>
+      <div id="dash-panel-analytics" class="dash-panel is-hidden" role="tabpanel" hidden>
+        <div class="hero">
+          <h1>Аналитика</h1>
         </div>
-        <div class="analytics-grid">
-          <div class="mini-stat">
-            <span class="mini-label">Средние просмотры</span>
-            <strong id="avg-views">—</strong>
-          </div>
-          <div class="mini-stat">
-            <span class="mini-label">Рилов в ленте</span>
-            <strong id="reels-count">—</strong>
-          </div>
-          <div class="mini-stat mini-stat-accent">
-            <span class="mini-label">Лучший рил</span>
-            <strong id="top-views">—</strong>
-          </div>
-        </div>
-        <div class="analytics-panels">
-          <div class="panel chart-panel">
-            <div class="panel-title">Динамика по дням</div>
-            <div id="views-chart" class="bar-chart" aria-label="График просмотров"></div>
-          </div>
-          <div class="panel top-panel" id="top-reel-panel" hidden>
-            <div class="panel-title">Топ Reel</div>
-            <div class="top-reel" id="top-reel"></div>
-          </div>
-        </div>
-      </section>
 
-      <form id="add-form" class="add-bar">
-        <div class="add-input-wrap">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10.5 5.43" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M14 11a5 5 0 0 0-7.07 0L4.8 13.12a5 5 0 1 0 7.07 7.07L13.5 18.57" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-          <input
-            id="reel-url"
-            name="instagram_url"
-            type="url"
-            required
-            placeholder="https://www.instagram.com/reel/…"
-          />
-        </div>
-        <button type="submit" class="btn btn-primary" id="add-btn">Добавить</button>
-      </form>
-      <p class="form-error add-error" id="add-error" hidden></p>
-
-      <div class="feed-head">
-        <h2>Твоя лента</h2>
-        <div class="view-toggle" role="group" aria-label="Вид ленты">
-          <button type="button" class="chip is-active" data-view="grid">Сетка</button>
-          <button type="button" class="chip" data-view="list">Список</button>
-        </div>
+        <section class="analytics" id="analytics">
+          <div id="analytics-stats" class="analytics-stats"></div>
+          <div class="analytics-panels">
+            <div class="panel chart-panel">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">Просмотры</div>
+                  <div class="chart-subtitle">По дням публикации</div>
+                </div>
+                <div class="chart-period" role="group" aria-label="Период">
+                  <button type="button" class="period-btn is-active" data-period="7D">7<span class="period-unit">Д</span></button>
+                  <button type="button" class="period-btn" data-period="30D">30<span class="period-unit">Д</span></button>
+                  <button type="button" class="period-btn" data-period="90D">90<span class="period-unit">Д</span></button>
+                </div>
+              </div>
+              <div id="views-chart" class="line-chart" aria-label="График просмотров"></div>
+            </div>
+          </div>
+        </section>
       </div>
-
-      <div id="feed" class="feed feed-grid" aria-live="polite"></div>
     </main>
   </section>
 

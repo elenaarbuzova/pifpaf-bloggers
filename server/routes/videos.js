@@ -104,7 +104,7 @@ router.get('/stats', (req, res) => {
          WHERE user_id = ? AND status = 'ready'
          GROUP BY day
          ORDER BY day DESC
-         LIMIT 14`
+         LIMIT 90`
       )
       .all(userId);
 
