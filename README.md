@@ -11,6 +11,16 @@ npm start
 
 http://localhost:3000
 
+## Быстрый live-демо (пока Render не поднят)
+
+```bash
+npm start
+# в другом терминале:
+cloudflared tunnel --url http://localhost:3000
+```
+
+Cloudflare выдаст URL вида `https://….trycloudflare.com` — его можно показывать как живой сайт.
+
 ## Деплой на Render (стабильный URL)
 
 1. Открой: **https://render.com/deploy?repo=https://github.com/elenaarbuzova/pifpaf-bloggers**

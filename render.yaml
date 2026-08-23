@@ -3,10 +3,14 @@ services:
     name: pifpaf-bloggers
     runtime: node
     plan: free
+    repo: https://github.com/elenaarbuzova/pifpaf-bloggers
+    branch: master
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
       - key: NODE_ENV
         value: production
       - key: SESSION_SECRET

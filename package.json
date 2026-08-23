@@ -9,7 +9,7 @@
     "db:init": "node server/db.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": "22.x"
   },
   "dependencies": {
     "apify-client": "^2.11.0",
